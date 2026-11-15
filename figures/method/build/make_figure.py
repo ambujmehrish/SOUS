@@ -2,7 +2,7 @@
 import base64, json, sys, math
 A = sys.argv[1]; OUT = sys.argv[2]
 def b64(p): return 'data:image/png;base64,' + base64.b64encode(open(p,'rb').read()).decode()
-W, H = 1000, 436
+W, H = 1000, 492
 # palette
 INK, SUB, LINE = '#262626', '#5f6368', '#4a4a4a'
 K, J = '#D23C5A', '#7A8794'                       # clicked player k, other player j
@@ -67,6 +67,21 @@ def ibox(x, y, h, label, kind, size=15, minw=0):
     tx = x+9+13+5 if kind in ('frz','trn') else x+w/2-tw(label,size,True)/2
     text(tx, y+h/2+size*0.34, label, size, anchor='start', weight='bold')
     return w
+import re
+
+SM = 13.5
+def I(t): return f'<tspan font-style="italic">{t}</tspan>'
+def S(t, size=SM, ital=True): return f'<tspan font-size="{size*0.72:.1f}" baseline-shift="-18%"{" font-style=\"italic\"" if ital else ""}>{t}</tspan>'
+def card(x, y, w, h, title, size=14.5):
+    rect(x, y, w, h, '#FAFAFC', '#C9CDD6', rx=7, sw=1)
+    text(x+9, y+17, title, size, anchor='start', weight='bold')
+def note(x, y, t, anchor='middle', size=SM, plate_=False, fill=SUB):
+    if plate_:
+        w = tw(re.sub('<[^>]+>', '', t), size) + 6
+        x0 = x - w/2 if anchor == 'middle' else x - 3
+        add(f'<rect x="{x0:.1f}" y="{y-size*0.8:.1f}" width="{w:.1f}" height="{size*1.08:.1f}" fill="#ffffff"/>')
+    text(x, y, t, size, anchor=anchor, fill=fill)
+
 HALO = ''
 def plate(cx, y, label, size):
     w = tw(label, size) + 6
@@ -236,8 +251,8 @@ add(f'<text x="{OC}" y="{OT-9}" font-size="19" text-anchor="middle" fill="{K}"><
 assert MX+mw <= 989, MX+mw
 
 # ---------- training strip ----------
-SY = 354
-rect(12, SY, 976, 76, '#F7F6FB', '#C9C3DF', rx=10, sw=1.1)
+SY = 390
+rect(12, SY, 976, 96, '#F7F6FB', '#C9C3DF', rx=10, sw=1.1)
 text(26, SY+26, 'Training', 17, anchor='start', weight='bold')
 text(26, SY+46, 'synthetic mixtures', 15, anchor='start', fill=SUB)
 text(26, SY+64, 'of solo videos', 15, anchor='start', fill=SUB)
@@ -273,6 +288,74 @@ lx = mx0 + 104 + 14
 flame(lx+8, SY+27, 0.95); text(lx+20, SY+32, 'Trained', 15, anchor='start')
 snow(lx+8, SY+53); text(lx+20, SY+58, 'Frozen', 15, anchor='start')
 assert lx+20+tw('Trained', 15) < 986, lx
+
+# ======================= added detail (fills empty space) =======================
+# Task card (under input video)
+TY = 126
+rect(FX, TY, FW, 67, '#FAFAFC', '#C9CDD6', rx=7, sw=1)
+text(FX+9, TY+16, 'Task', 14.5, anchor='start', weight='bold')
+text(FX+9, TY+32, f'{I("x")} = Σ{S("n")} {I("s")}{S("n")}   mixture of {I("N")} players', SM, anchor='start', fill=INK)
+text(FX+9, TY+47, f'output {I("ŝ")}{S("k")} for the clicked player {I("k")}', SM, anchor='start', fill=INK)
+hc = f'hard case: {I("j")} ≠ {I("k")}, same instrument'
+text(FX+9, TY+62, hc, SM, anchor='start', fill=K)
+for t_ in ['hard case: j ≠ k, same instrument']:
+    assert FX+9+tw(t_, SM) < FX+FW-2, t_
+# Keypoint-token card (under SAM / crops), with leader to the keypoint view
+KC = (sx-2, 136, 192, 76)
+card(*KC, 'Keypoint token per frame')
+text(KC[0]+9, KC[1]+35, f'{I("u")}{S("t,i")} = ({I("p")}{S("t,i")} − {I("p")}{S("t−1,i")}) / {I("b")}{S("t")}', SM, anchor='start', fill=INK)
+text(KC[0]+9, KC[1]+52, f'{I("m")}{S("t")} = [{I("u")}{S("t,1:48")}, {I("c")}{S("t,1:48")}], 144-d', SM, anchor='start', fill=INK)
+text(KC[0]+9, KC[1]+69, 'velocity, confidence, no position', SM, anchor='start', fill=KPT)
+add(f'<path d="M{KC[0]+KC[2]},{KC[1]+40} L{KX+6},{ROW2+KS/2+4}" fill="none" stroke="#9aa0a8" stroke-width="0.9" stroke-dasharray="2.5,2"/>')
+assert KC[0]+KC[2] < ex, (KC, ex)
+# encoder sub-labels
+note(ex+vw/2, ROW1+31, 'ViT-L')
+note(ex+rw/2, ROW2+33, '48 keypoints')
+note(sx+sw_/2, mid+48, 'Hiera-L')
+# token specs (on white plates over the clock lines)
+vs = '16 × 1024-d, 12.5 Hz'; assert TC+tw(vs, 13)/2 < BX-2
+note(TC, ROW1+43, vs, size=13, plate_=True)
+note(TC, ROW2+44, '144-d, 25 Hz', size=13, plate_=True)
+note(TC, ROWA+44, '256-d bands, hop 512', size=13, plate_=True)
+note(sx+stw/2, ROWA+33, 'win 2048', size=13)
+# separator-block equations card
+BC = (sx-2, 300, TL-12-(sx-2), 78)
+card(*BC, f'Inside separator block {I("ℓ")}')
+ex0 = BC[0]+12
+text(ex0, BC[1]+36, f'{I("H")} ← Time{S("ℓ")}({I("H")})', SM+0.5, anchor='start', fill=INK)
+text(ex0, BC[1]+53, f'{I("H")} ← {I("H")} + {I("W")}{S("ℓ")} CrossAttn{S("ℓ")}({I("H")}, {I("Z")}{S("k")})', SM+0.5, anchor='start', fill=INK)
+text(ex0, BC[1]+70, f'{I("H")} ← Band{S("ℓ")}({I("H")})', SM+0.5, anchor='start', fill=INK)
+nx = BC[0]+268
+add(f'<line x1="{nx-12}" y1="{BC[1]+24}" x2="{nx-12}" y2="{BC[1]+72}" stroke="#d6d9df" stroke-width="1"/>')
+text(nx, BC[1]+36, f'{I("W")}{S("ℓ")} = 0 at init: training starts', SM, anchor='start', fill=SUB)
+text(nx, BC[1]+53, 'from the exact pretrained trunk', SM, anchor='start', fill=SUB)
+text(nx, BC[1]+70, f'audio queries, player tokens {I("Z")}{S("k")} as keys', SM, anchor='start', fill=SUB)
+assert nx + tw('audio queries, player tokens Zk as keys', SM) < BC[0]+BC[2]-4
+add(f'<path d="M{BC[0]+BC[2]},{BC[1]+39} L{TL},{BC[1]+39}" fill="none" stroke="#9aa0a8" stroke-width="0.9" stroke-dasharray="2.5,2"/>')
+# inference card (under mixture)
+card(FX, 300, FW, 78, 'Inference')
+text(FX+9, 300+36, '4 s windows, 50% overlap', SM, anchor='start', fill=INK)
+text(FX+9, 300+53, 'mono input fed to both stereo', SM, anchor='start', fill=INK)
+text(FX+9, 300+70, 'channels, outputs averaged', SM, anchor='start', fill=INK)
+# trunk + mask-head notes
+note((TL+TR)/2, TB+16, 'MVSep Mega, BS-RoFormer')
+note((TL+TR)/2, TB+31, '26.3M pretrained weights')
+note(OC, ROWA+33, 'complex mask')
+note(OC, ROWA+48, 'replaces 53 stem')
+note(OC, ROWA+63, 'heads')
+# parameter card (top right)
+PC = (MX, 10, mw, 106)
+card(*PC, 'Trained 43.9M', size=14)
+text(PC[0]+7, PC[1]+34, 'trunk, cross-attn,', 13, anchor='start', fill=SUB)
+text(PC[0]+7, PC[1]+49, 'mask head', 13, anchor='start', fill=SUB)
+text(PC[0]+7, PC[1]+69, 'Frozen', 14, anchor='start', weight='bold')
+text(PC[0]+7, PC[1]+85, 'SAM 2.1, RTMW,', 13, anchor='start', fill=SUB)
+text(PC[0]+7, PC[1]+100, 'V-JEPA 2', 13, anchor='start', fill=SUB)
+for t_ in ['trunk, cross-attn,', 'SAM 2.1, RTMW,']:
+    assert PC[0]+7+tw(t_, 13) < PC[0]+PC[2]-3, t_
+# training-strip footer
+text(CX + (4*(CW+GAP)+108)/2, SY+86, f'Solos + MUSIC-21, 26 instruments  ·  4 s clips  ·  {I("ℓ")}{S("1")} loss on waveform and complex spectrograms at 5 resolutions  ·  URMP never used for training', SM, fill=SUB)
+
 add('</svg>')
 open(OUT, 'w').write('\n'.join(s))
 print('wrote', OUT, 'encoders at', ex, 'kp end', KX+KS)
