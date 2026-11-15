@@ -2,7 +2,7 @@
 import base64, json, sys, math
 A = sys.argv[1]; OUT = sys.argv[2]
 def b64(p): return 'data:image/png;base64,' + base64.b64encode(open(p,'rb').read()).decode()
-W, H = 1000, 492
+W, H = 1000, 472
 # palette
 INK, SUB, LINE = '#262626', '#5f6368', '#4a4a4a'
 K, J = '#D23C5A', '#7A8794'                       # clicked player k, other player j
@@ -105,7 +105,7 @@ ASTEP = VSTEP/2*25/86.13; NAUD = int(SPAN/ASTEP)
 for i in range(5):
     gx = TX0 + 8 + i*VSTEP
     add(f'<line x1="{gx}" y1="30" x2="{gx}" y2="{ROWA+14}" stroke="#bcc1c8" stroke-width="0.9" stroke-dasharray="2.5,2.5"/>')
-text(TC, 20, 'shared clock (RoPE, 10 ms)', 14, fill=SUB, style='italic')
+text(TC, 20, 'shared clock', 14, fill=SUB, style='italic')
 
 # ---------- input video + click ----------
 FX, FY, FW = 12, 34, 190
@@ -126,21 +126,18 @@ text(jx, jy-4.4, 'j', 11.5, fill='#fff', style='italic', weight='bold')
 cx, cy = fx(300), fy(225)
 add(f'<g transform="translate({cx:.2f},{cy:.2f}) scale(0.85)"><circle cx="0" cy="0" r="6" fill="none" stroke="#fff" stroke-width="1.6"/>'
     f'<path d="M0,0 L0,15 L3.6,11.4 L6.4,17.6 L8.6,16.6 L5.8,10.4 L10.8,10.4 Z" fill="#fff" stroke="#111" stroke-width="1.1" stroke-linejoin="round"/></g>')
-text(FX+FW/2, FY+FH+17, f'Click on player <tspan font-style="italic" fill="{K}" font-weight="bold">k</tspan>', 15.5, fill=SUB)
 
 # ---------- SAM 2.1 -> crops ----------
 mid = FY + FH/2
 sx = FX+FW+16
 arrow([(FX+FW+1, mid), (sx-2, mid)])
 sw_ = ibox(sx, mid-18, 36, 'SAM 2.1', 'frz')
-text(sx+sw_/2, mid+34, 'track', 14, fill=SUB, style='italic')
 CS = 58; cx0 = sx+sw_+15
 arrow([(sx+sw_+1, mid), (cx0-2, mid)])
 for (ox, oy, op) in [(14, -14, 0.5), (7, -7, 0.75), (0, 0, 1.0)]:
     x0, y0 = cx0+ox, mid-CS/2+6+oy
     add(f'<image href="{crop}" x="{x0}" y="{y0}" width="{CS}" height="{CS}" opacity="{op}"/>')
     add(f'<rect x="{x0}" y="{y0}" width="{CS}" height="{CS}" fill="none" stroke="{K}" stroke-width="1.3"/>')
-text(cx0+CS/2+7, mid+CS/2+24, 'Player crops', 15.5, fill=SUB)
 
 # ---------- frozen encoders ----------
 ex = cx0+CS+14+15
@@ -168,7 +165,6 @@ for p in [(185,135),(172,120),(198,120),(178,195),(120,225),(240,215),(98,295),(
 for (p, v) in [((212,290),(78,-70)),((98,295),(44,-40)),((350,232),(-40,16))]:
     x1, y1 = kp(*p); x2, y2 = kp(p[0]+v[0], p[1]+v[1])
     add(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="#1E7A43" stroke-width="1.7" marker-end="url(#ahg)"/>')
-text(KX+KS/2, ROW2+KS/2+16, 'velocities', 14, fill=SUB, style='italic')
 assert KX+KS < TX0-14, (KX+KS, TX0)
 
 # ---------- token rows ----------
@@ -241,10 +237,6 @@ OC = MX+mw/2
 OT, OHh = 150, 40
 arrow([(OC, ROWA-19), (OC, OT+OHh+2)])
 _xw = tw('X', 14, ital=True); _cc = OC-6-_xw-7
-text(OC-6, 209, '<tspan font-style="italic">X</tspan>', 14, anchor='end', fill=SUB)
-add(f'<circle cx="{_cc:.1f}" cy="204.6" r="3.6" fill="none" stroke="{SUB}" stroke-width="0.9"/><circle cx="{_cc:.1f}" cy="204.6" r="0.95" fill="{SUB}"/>')
-text(_cc-6.5, 209, '<tspan font-style="italic">M</tspan>', 14, anchor='end', fill=SUB)
-text(OC-6, 225, 'iSTFT', 14, anchor='end', fill=SUB)
 rect(MX, OT, mw, OHh, '#FFF6F8', K, rx=3, sw=1.1)
 wave(MX+3, OT+3, mw-6, OHh-6, wav['k'], K)
 add(f'<text x="{OC}" y="{OT-9}" font-size="19" text-anchor="middle" fill="{K}"><tspan font-style="italic">ŝ</tspan><tspan font-style="italic" font-size="12.5" dy="4">k</tspan></text>')
@@ -252,18 +244,15 @@ assert MX+mw <= 989, MX+mw
 
 # ---------- training strip ----------
 SY = 390
-rect(12, SY, 976, 96, '#F7F6FB', '#C9C3DF', rx=10, sw=1.1)
-text(26, SY+26, 'Training', 17, anchor='start', weight='bold')
-text(26, SY+46, 'synthetic mixtures', 15, anchor='start', fill=SUB)
-text(26, SY+64, 'of solo videos', 15, anchor='start', fill=SUB)
+rect(12, SY, 976, 76, '#F7F6FB', '#C9C3DF', rx=10, sw=1.1)
+text(26, SY+44, 'Training', 17, anchor='start', weight='bold')
 stages = [('Different instrument', '0–4k'), ('Same instrument', '4k–8k'), ('Same performer', '8k–12k'), ('All mixed', '12k+')]
 CX, CW, GAP = 160, 132, 16
 NA, NB = '#C97A1E', '#3D7FD0'
 for i, (lab, st) in enumerate(stages):
     x0 = CX + i*(CW+GAP); y0 = SY+9
     rect(x0, y0, CW, 58, '#ffffff', '#cfcbe0', rx=7, sw=1)
-    text(x0+CW/2, y0+13, f'steps {st}', 12.5, fill='#8a8a8a', style='italic')
-    py = y0+31
+    py = y0+24
     if i < 3:
         person(x0+CW/2-26, py, K, note=NA); text(x0+CW/2, py+4, '+', 15, fill=SUB)
         person(x0+CW/2+18, py, [J, J, K][i], note=[NB, NA, NA][i])
@@ -274,87 +263,113 @@ for i, (lab, st) in enumerate(stages):
         person(x0+26, py, K, note=NA); text(x0+45, py+4, '+', 15, fill=SUB)
         for n, (col, nt) in enumerate([(J, NA), ('#A9B4BF', NB), ('#A9B4BF', '#3F9E63'), ('#A9B4BF', '#8A63D2')]):
             person(x0+60+n*19, py+1, col, sc=0.74, note=nt)
-    text(x0+CW/2, y0+52, lab, 15)
+    text(x0+CW/2, y0+49, lab, 15)
     if i < 3:
         arrow([(x0+CW+1, y0+29), (x0+CW+GAP-2, y0+29)], sw=1.3)
 mx0 = CX + 4*(CW+GAP) + 4
 rect(mx0, SY+9, 104, 58, '#ffffff', '#cfcbe0', rx=7, sw=1)
-person(mx0+32, SY+40, K, note=NA)
-add(f'<g transform="translate({mx0+72},{SY+40}) scale(-1,1)" opacity="0.55"><circle cx="0" cy="-7" r="4.6" fill="{K}"/><path d="M-8,8 C-8,0 -4.5,-1.5 0,-1.5 C4.5,-1.5 8,0 8,8 Z" fill="{K}"/>'
+person(mx0+32, SY+33, K, note=NA)
+add(f'<g transform="translate({mx0+72},{SY+33}) scale(-1,1)" opacity="0.55"><circle cx="0" cy="-7" r="4.6" fill="{K}"/><path d="M-8,8 C-8,0 -4.5,-1.5 0,-1.5 C4.5,-1.5 8,0 8,8 Z" fill="{K}"/>'
     f'<g transform="translate(9,-6)"><ellipse cx="0" cy="4" rx="2.6" ry="2" fill="{NA}" transform="rotate(-20 0 4)"/><line x1="2.3" y1="3.4" x2="2.3" y2="-5" stroke="{NA}" stroke-width="1.3"/><path d="M2.3,-5 C4.5,-4 5.5,-2.5 5,-0.5" fill="none" stroke="{NA}" stroke-width="1.3"/></g></g>')
-add(f'<line x1="{mx0+52}" y1="{SY+20}" x2="{mx0+52}" y2="{SY+48}" stroke="{SUB}" stroke-width="0.9" stroke-dasharray="2,2"/>')
-text(mx0+52, SY+61, 'Mirror, <tspan font-style="italic">p</tspan> = 0.5', 15)
+add(f'<line x1="{mx0+52}" y1="{SY+16}" x2="{mx0+52}" y2="{SY+42}" stroke="{SUB}" stroke-width="0.9" stroke-dasharray="2,2"/>')
+text(mx0+52, SY+58, "Mirror", 15)
 lx = mx0 + 104 + 14
 flame(lx+8, SY+27, 0.95); text(lx+20, SY+32, 'Trained', 15, anchor='start')
 snow(lx+8, SY+53); text(lx+20, SY+58, 'Frozen', 15, anchor='start')
 assert lx+20+tw('Trained', 15) < 986, lx
 
-# ======================= added detail (fills empty space) =======================
-# Task card (under input video)
-TY = 126
-rect(FX, TY, FW, 67, '#FAFAFC', '#C9CDD6', rx=7, sw=1)
-text(FX+9, TY+16, 'Task', 14.5, anchor='start', weight='bold')
-text(FX+9, TY+32, f'{I("x")} = Σ{S("n")} {I("s")}{S("n")}   mixture of {I("N")} players', SM, anchor='start', fill=INK)
-text(FX+9, TY+47, f'output {I("ŝ")}{S("k")} for the clicked player {I("k")}', SM, anchor='start', fill=INK)
-hc = f'hard case: {I("j")} ≠ {I("k")}, same instrument'
-text(FX+9, TY+62, hc, SM, anchor='start', fill=K)
-for t_ in ['hard case: j ≠ k, same instrument']:
-    assert FX+9+tw(t_, SM) < FX+FW-2, t_
-# Keypoint-token card (under SAM / crops), with leader to the keypoint view
-KC = (sx-2, 136, 192, 76)
-card(*KC, 'Keypoint token per frame')
-text(KC[0]+9, KC[1]+35, f'{I("u")}{S("t,i")} = ({I("p")}{S("t,i")} − {I("p")}{S("t−1,i")}) / {I("b")}{S("t")}', SM, anchor='start', fill=INK)
-text(KC[0]+9, KC[1]+52, f'{I("m")}{S("t")} = [{I("u")}{S("t,1:48")}, {I("c")}{S("t,1:48")}], 144-d', SM, anchor='start', fill=INK)
-text(KC[0]+9, KC[1]+69, 'velocity, confidence, no position', SM, anchor='start', fill=KPT)
-add(f'<path d="M{KC[0]+KC[2]},{KC[1]+40} L{KX+6},{ROW2+KS/2+4}" fill="none" stroke="#9aa0a8" stroke-width="0.9" stroke-dasharray="2.5,2"/>')
-assert KC[0]+KC[2] < ex, (KC, ex)
-# encoder sub-labels
-note(ex+vw/2, ROW1+31, 'ViT-L')
-note(ex+rw/2, ROW2+33, '48 keypoints')
-note(sx+sw_/2, mid+48, 'Hiera-L')
-# token specs (on white plates over the clock lines)
-vs = '16 × 1024-d, 12.5 Hz'; assert TC+tw(vs, 13)/2 < BX-2
-note(TC, ROW1+43, vs, size=13, plate_=True)
-note(TC, ROW2+44, '144-d, 25 Hz', size=13, plate_=True)
-note(TC, ROWA+44, '256-d bands, hop 512', size=13, plate_=True)
-note(sx+stw/2, ROWA+33, 'win 2048', size=13)
-# separator-block equations card
-BC = (sx-2, 300, TL-12-(sx-2), 78)
-card(*BC, f'Inside separator block {I("ℓ")}')
-ex0 = BC[0]+12
-text(ex0, BC[1]+36, f'{I("H")} ← Time{S("ℓ")}({I("H")})', SM+0.5, anchor='start', fill=INK)
-text(ex0, BC[1]+53, f'{I("H")} ← {I("H")} + {I("W")}{S("ℓ")} CrossAttn{S("ℓ")}({I("H")}, {I("Z")}{S("k")})', SM+0.5, anchor='start', fill=INK)
-text(ex0, BC[1]+70, f'{I("H")} ← Band{S("ℓ")}({I("H")})', SM+0.5, anchor='start', fill=INK)
-nx = BC[0]+268
-add(f'<line x1="{nx-12}" y1="{BC[1]+24}" x2="{nx-12}" y2="{BC[1]+72}" stroke="#d6d9df" stroke-width="1"/>')
-text(nx, BC[1]+36, f'{I("W")}{S("ℓ")} = 0 at init: training starts', SM, anchor='start', fill=SUB)
-text(nx, BC[1]+53, 'from the exact pretrained trunk', SM, anchor='start', fill=SUB)
-text(nx, BC[1]+70, f'audio queries, player tokens {I("Z")}{S("k")} as keys', SM, anchor='start', fill=SUB)
-assert nx + tw('audio queries, player tokens Zk as keys', SM) < BC[0]+BC[2]-4
-add(f'<path d="M{BC[0]+BC[2]},{BC[1]+39} L{TL},{BC[1]+39}" fill="none" stroke="#9aa0a8" stroke-width="0.9" stroke-dasharray="2.5,2"/>')
-# inference card (under mixture)
-card(FX, 300, FW, 78, 'Inference')
-text(FX+9, 300+36, '4 s windows, 50% overlap', SM, anchor='start', fill=INK)
-text(FX+9, 300+53, 'mono input fed to both stereo', SM, anchor='start', fill=INK)
-text(FX+9, 300+70, 'channels, outputs averaged', SM, anchor='start', fill=INK)
-# trunk + mask-head notes
-note((TL+TR)/2, TB+16, 'MVSep Mega, BS-RoFormer')
-note((TL+TR)/2, TB+31, '26.3M pretrained weights')
-note(OC, ROWA+33, 'complex mask')
-note(OC, ROWA+48, 'replaces 53 stem')
-note(OC, ROWA+63, 'heads')
-# parameter card (top right)
-PC = (MX, 10, mw, 106)
-card(*PC, 'Trained 43.9M', size=14)
-text(PC[0]+7, PC[1]+34, 'trunk, cross-attn,', 13, anchor='start', fill=SUB)
-text(PC[0]+7, PC[1]+49, 'mask head', 13, anchor='start', fill=SUB)
-text(PC[0]+7, PC[1]+69, 'Frozen', 14, anchor='start', weight='bold')
-text(PC[0]+7, PC[1]+85, 'SAM 2.1, RTMW,', 13, anchor='start', fill=SUB)
-text(PC[0]+7, PC[1]+100, 'V-JEPA 2', 13, anchor='start', fill=SUB)
-for t_ in ['trunk, cross-attn,', 'SAM 2.1, RTMW,']:
-    assert PC[0]+7+tw(t_, 13) < PC[0]+PC[2]-3, t_
-# training-strip footer
-text(CX + (4*(CW+GAP)+108)/2, SY+86, f'Solos + MUSIC-21, 26 instruments  ·  4 s clips  ·  {I("ℓ")}{S("1")} loss on waveform and complex spectrograms at 5 resolutions  ·  URMP never used for training', SM, fill=SUB)
+# ======================= graphics that fill empty space =======================
+import numpy as _np
+def curve(pts, color, sw=1.4, op=1, dash=None):
+    d = 'M' + ' L'.join(f'{x:.1f},{y:.1f}' for x, y in pts)
+    da = f' stroke-dasharray="{dash}"' if dash else ''
+    add(f'<path d="{d}" fill="none" stroke="{color}" stroke-width="{sw}" opacity="{op}" stroke-linejoin="round"{da}/>')
+ONS = [0.0, 0.6, 1.15, 1.55, 2.35, 2.85]    # note onsets of player k (same as synthetic audio)
+
+# --- sources sum into the mixture (under the input video) ---
+for (x0, env, col, lab) in [(FX, wav['k'], K, 'k'), (FX+FW/2+12, wav['j'], J, 'j')]:
+    w0 = FW/2-12
+    rect(x0, 142, w0, 30, '#ffffff', col, rx=3, sw=1)
+    wave(x0+2, 144, w0-4, 26, env, col)
+    add(f'<text x="{x0+4}" y="138" font-size="15" fill="{col}"><tspan font-style="italic">s</tspan><tspan font-style="italic" font-size="11" baseline-shift="-18%">{lab}</tspan></text>')
+text(FX+FW/2, 162, '+', 17, fill=SUB)
+arrow([(FX+20, 173), (FX+20, ROWA-27)], sw=1.2)
+arrow([(FX+FW-20, 173), (FX+FW-20, ROWA-27)], sw=1.2)
+
+# --- keypoint velocity over time vs. note onsets (timing cue) ---
+PX0, PY0, PW, PH = sx, 140, 190, 64
+rect(PX0-2, PY0-6, PW+4, PH+12, '#FAFAFC', '#D3D6DD', rx=7, sw=1)
+mid_y = PY0 + PH/2
+add(f'<line x1="{PX0+14}" y1="{mid_y}" x2="{PX0+PW-6}" y2="{mid_y}" stroke="#9aa0a8" stroke-width="0.8" marker-end="url(#ah)"/>')
+tt = _np.linspace(0, 3.95, 240)
+v = _np.zeros_like(tt)
+for n_, o in enumerate(ONS):
+    e = ONS[n_+1] if n_+1 < len(ONS) else 3.95
+    m = (tt >= o) & (tt < e)
+    ph = (tt[m]-o)/(e-o)
+    v[m] = (1 if n_ % 2 == 0 else -1) * _np.sin(_np.pi*ph)**0.7
+xs = PX0+14 + tt/3.95*(PW-24)
+for o in ONS:
+    ox = PX0+14 + o/3.95*(PW-24)
+    add(f'<line x1="{ox:.1f}" y1="{PY0+2}" x2="{ox:.1f}" y2="{PY0+PH-2}" stroke="{K}" stroke-width="1.1" stroke-dasharray="2,1.6" opacity="0.85"/>')
+curve(list(zip(xs, mid_y - v*PH*0.38)), KPT, sw=1.7)
+text(PX0+5, mid_y+5, f'<tspan font-style="italic">u</tspan>', 14, fill=KPT, anchor='start')
+add(f'<path d="M{PX0+PW+2},{PY0+PH/2} L{KX+4},{ROW2+KS/2-2}" fill="none" stroke="#9aa0a8" stroke-width="0.9" stroke-dasharray="2.5,2"/>')
+assert PX0+PW+2 < ex
+
+# --- inference windows (under the mixture) ---
+IX, IY, IW = FX, 312, FW
+rect(IX, IY-12, IW, 66, '#FAFAFC', '#D3D6DD', rx=7, sw=1)
+wave(IX+8, IY+28, IW-16, 22, wav['mix'], '#9a9a9a')
+nwin, ww = 5, (IW-16)/3
+for n_ in range(nwin):
+    wx = IX+8 + n_*ww/2
+    wwid = min(ww, IX+IW-8-wx)
+    if wwid < ww*0.6: break
+    yy = IY + (n_ % 2)*11
+    add(f'<rect x="{wx:.1f}" y="{yy}" width="{wwid:.1f}" height="9" rx="3" fill="{AUD}" opacity="0.32" stroke="{AUD}" stroke-width="0.9"/>')
+
+# --- cross-attention: one audio query attends to player tokens near the same time ---
+CXL, CXR, CY0 = sx+28, TL-30, 300
+rect(sx-2, CY0-4, TL-12-(sx-2), 82, '#FAFAFC', '#D3D6DD', rx=7, sw=1)
+yZ, yH = CY0+12, CY0+60
+step = (CXR-CXL)/24
+for n_ in range(25):
+    x_ = CXL + n_*step
+    if n_ % 2 == 0:
+        for r_ in range(3):
+            for c_ in range(3):
+                add(f'<rect x="{x_-4.5+c_*3:.1f}" y="{yZ-4.5+r_*3:.1f}" width="3" height="3" fill="{VID}" opacity="{0.55+0.15*((r_+c_+n_)%3):.2f}"/>')
+    else:
+        add(f'<rect x="{x_-1.8:.1f}" y="{yZ-6}" width="3.6" height="12" rx="1" fill="{KPT}" opacity="0.8"/>')
+na = 68; astep = (CXR-CXL)/(na-1)
+qi = 37; qx = CXL + qi*astep
+for n_ in range(na):
+    x_ = CXL + n_*astep
+    add(f'<rect x="{x_-1.1:.1f}" y="{yH-6}" width="2.2" height="12" rx="0.6" fill="{AUD}" opacity="{1 if n_ == qi else 0.45}"/>')
+add(f'<rect x="{qx-3:.1f}" y="{yH-9}" width="6" height="18" rx="2" fill="none" stroke="{INK}" stroke-width="1.1"/>')
+for n_ in range(25):
+    x_ = CXL + n_*step
+    wgt = _np.exp(-((x_-qx)/(1.6*step))**2)
+    if wgt < 0.04: continue
+    add(f'<path d="M{qx:.1f},{yH-10} C{qx:.1f},{(yH+yZ)/2:.1f} {x_:.1f},{(yH+yZ)/2:.1f} {x_:.1f},{yZ+8}" fill="none" stroke="{INK}" stroke-width="{0.5+2.4*wgt:.2f}" opacity="{0.25+0.65*wgt:.2f}"/>')
+add(f'<text x="{CXL-18}" y="{yZ+5}" font-size="15" text-anchor="middle"><tspan font-style="italic">Z</tspan><tspan font-style="italic" font-size="11" baseline-shift="-18%">k</tspan></text>')
+text(CXL-18, yH+5, '<tspan font-style="italic">H</tspan>', 15)
+text(qx+10, yH+18, '<tspan font-style="italic">Q</tspan>', 13, fill=SUB, anchor='start')
+add(f'<path d="M{TL-12},{CY0+37} L{TL},{CY0+37}" fill="none" stroke="#9aa0a8" stroke-width="0.9" stroke-dasharray="2.5,2"/>')
+
+# --- clicked player -> their sound (top right) ---
+PCX, PCY, PCS = MX+6, 22, 58
+add(f'<image href="{crop}" x="{PCX}" y="{PCY}" width="{PCS}" height="{PCS}"/>')
+add(f'<rect x="{PCX}" y="{PCY}" width="{PCS}" height="{PCS}" fill="none" stroke="{K}" stroke-width="1.8"/>')
+add(f'<rect x="{PCX-0.9}" y="{PCY-11}" width="13" height="11" fill="{K}"/>')
+text(PCX+5.6, PCY-2.4, 'k', 11.5, fill='#fff', style='italic', weight='bold')
+spx, spy = PCX+PCS+8, PCY+PCS/2
+add(f'<path d="M{spx},{spy-4} L{spx+5},{spy-4} L{spx+11},{spy-10} L{spx+11},{spy+10} L{spx+5},{spy+4} L{spx},{spy+4} Z" fill="{K}"/>')
+for r_ in (6, 11):
+    add(f'<path d="M{spx+12+r_*0.3:.1f},{spy-r_*0.85:.1f} A{r_},{r_} 0 0 1 {spx+12+r_*0.3:.1f},{spy+r_*0.85:.1f}" fill="none" stroke="{K}" stroke-width="1.4" stroke-linecap="round"/>')
+add(f'<path d="M{PCX+PCS/2},{PCY+PCS+3} L{PCX+PCS/2},{OT-24}" fill="none" stroke="{K}" stroke-width="1" stroke-dasharray="2.5,2"/>')
+assert spx+12+11*0.3+11 < 990
 
 add('</svg>')
 open(OUT, 'w').write('\n'.join(s))
